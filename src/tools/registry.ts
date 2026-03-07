@@ -134,25 +134,23 @@ export function getToolRegistry(model: string): RegisteredTool[] {
   return tools;
 }
 
-/**
- * Get just the tool instances for binding to the LLM.
- *
- * @param model - The model name
- * @returns Array of tool instances
- */
-export function getTools(model: string): StructuredToolInterface[] {
-  return getToolRegistry(model).map((t) => t.tool);
+// Memoize registry by model name to avoid creating duplicate tool instances
+const registryCache = new Map<string, RegisteredTool[]>();
+
+function getCachedRegistry(model: string): RegisteredTool[] {
+  const cached = registryCache.get(model);
+  if (cached) return cached;
+  const registry = getToolRegistry(model);
+  registryCache.set(model, registry);
+  return registry;
 }
 
-/**
- * Build the tool descriptions section for the system prompt.
- * Formats each tool's rich description with a header.
- *
- * @param model - The model name
- * @returns Formatted string with all tool descriptions
- */
+export function getTools(model: string): StructuredToolInterface[] {
+  return getCachedRegistry(model).map((t) => t.tool);
+}
+
 export function buildToolDescriptions(model: string): string {
-  return getToolRegistry(model)
+  return getCachedRegistry(model)
     .map((t) => `### ${t.name}\n\n${t.description}`)
     .join('\n\n');
 }

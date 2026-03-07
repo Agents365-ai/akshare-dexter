@@ -1,5 +1,6 @@
-import { existsSync, mkdirSync, appendFileSync, readFileSync } from 'fs';
+import { existsSync, mkdirSync, appendFileSync } from 'fs';
 import { join } from 'path';
+import { homedir } from 'os';
 import { createHash } from 'crypto';
 
 /**
@@ -63,7 +64,7 @@ const DEFAULT_LIMIT_CONFIG: ToolLimitConfig = {
  * - Query similarity detection to help prevent retry loops
  */
 export class Scratchpad {
-  private readonly scratchpadDir = '.dexter/scratchpad';
+  private readonly scratchpadDir = join(homedir(), '.dexter', 'scratchpad');
   private readonly filepath: string;
   private readonly limitConfig: ToolLimitConfig;
 
@@ -129,7 +130,16 @@ export class Scratchpad {
     const currentCount = this.toolCallCounts.get(toolName) ?? 0;
     const maxCalls = this.limitConfig.maxCallsPerTool;
 
-    // Check if over the suggested limit - warn but allow
+    // Hard block at 2x the suggested limit
+    const hardCap = maxCalls * 2;
+    if (currentCount >= hardCap) {
+      return {
+        allowed: false,
+        warning: `Tool '${toolName}' blocked: reached hard limit of ${hardCap} calls.`,
+      };
+    }
+
+    // Warn when over the suggested limit
     if (currentCount >= maxCalls) {
       return {
         allowed: true,
