@@ -171,6 +171,8 @@ export function createCnMarketSearch(model: string): DynamicStructuredTool {
       const toolNames = [...new Set(toolCalls.map(tc => formatSubToolName(tc.name)))];
       onProgress?.(`Fetching from ${toolNames.join(', ')}...`);
 
+      const MAX_RESULT_CHARS = 20_000;
+
       const results = await Promise.all(
         toolCalls.map(async (tc) => {
           try {
@@ -179,7 +181,14 @@ export function createCnMarketSearch(model: string): DynamicStructuredTool {
             const rawResult = await tool.invoke(tc.args);
             const result = typeof rawResult === 'string' ? rawResult : JSON.stringify(rawResult);
             const parsed = JSON.parse(result);
-            return { tool: tc.name, args: tc.args, data: parsed.data, sourceUrls: parsed.sourceUrls || [], error: null };
+            let data = parsed.data;
+            // Truncate large array results to prevent context overflow
+            if (Array.isArray(data) && JSON.stringify(data).length > MAX_RESULT_CHARS) {
+              const totalCount = data.length;
+              const truncated = data.slice(0, 50);
+              data = { items: truncated, total_count: totalCount, truncated: true, note: `Showing 50 of ${totalCount} results` };
+            }
+            return { tool: tc.name, args: tc.args, data, sourceUrls: parsed.sourceUrls || [], error: null };
           } catch (error) {
             return { tool: tc.name, args: tc.args, data: null, sourceUrls: [], error: error instanceof Error ? error.message : String(error) };
           }
