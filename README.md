@@ -2,7 +2,7 @@
 
 AkShare Dexter is an autonomous financial research agent that thinks, plans, and learns as it works. It performs analysis using task planning, self-reflection, and real-time market data. Think Claude Code, but built specifically for financial research. Supports both US and Chinese A-share markets.
 
-<img width="1098" alt="AK-Share Dexter Banner" src="docs/banner.png" />
+<img width="1098" alt="AK-Share Dexter Banner" src="images/banner.png" />
 
 ## Table of Contents
 
