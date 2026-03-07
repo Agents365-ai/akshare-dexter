@@ -137,6 +137,9 @@ export function createFinancialMetrics(model: string): DynamicStructuredTool {
         systemPrompt: buildRouterPrompt(),
         tools: METRICS_TOOLS,
       });
+      if (typeof response === 'string') {
+        return formatToolResult({ error: 'Router returned text instead of tool calls', text: response }, []);
+      }
       const aiMessage = response as AIMessage;
 
       // 2. Check for tool calls

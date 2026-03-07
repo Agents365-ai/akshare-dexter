@@ -79,7 +79,8 @@ ${skillList}
 /**
  * Default system prompt used when no specific prompt is provided.
  */
-export const DEFAULT_SYSTEM_PROMPT = `You are Super Dexter, a helpful AI assistant.
+export function getDefaultSystemPrompt(): string {
+  return `You are Super Dexter, a helpful AI assistant.
 
 Current date: ${getCurrentDate()}
 
@@ -117,6 +118,7 @@ Keep tables compact:
 - Abbreviate: Rev, Op Inc, Net Inc, OCF, FCF, GM, OM, EPS
 - Numbers compact: 102.5B not $102,466,000,000
 - Omit units in cells if header has them`;
+}
 
 // ============================================================================
 // Group Chat Context

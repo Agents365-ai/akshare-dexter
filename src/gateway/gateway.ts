@@ -161,8 +161,8 @@ async function handleInbound(cfg: GatewayConfig, inbound: WhatsAppInboundMessage
     const answer = await runAgentForMessage({
       sessionKey: route.sessionKey,
       query,
-      model: 'gpt-5.4',
-      modelProvider: 'openai',
+      model: process.env.DEFAULT_MODEL || 'gpt-5.4',
+      modelProvider: process.env.DEFAULT_MODEL_PROVIDER || 'openai',
       channel: 'whatsapp',
       groupContext,
     });

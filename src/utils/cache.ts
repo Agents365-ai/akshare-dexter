@@ -125,9 +125,12 @@ function removeCacheFile(filepath: string): void {
  * Read a cached API response if it exists.
  * Returns null on cache miss or any read/parse error.
  */
+const DEFAULT_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24 hours
+
 export function readCache(
   endpoint: string,
-  params: Record<string, string | number | string[] | undefined>
+  params: Record<string, string | number | string[] | undefined>,
+  maxAgeMs: number = DEFAULT_MAX_AGE_MS
 ): { data: Record<string, unknown>; url: string } | null {
   const cacheKey = buildCacheKey(endpoint, params);
   const filepath = join(CACHE_DIR, cacheKey);
@@ -144,6 +147,13 @@ export function readCache(
     // Validate entry structure
     if (!isValidCacheEntry(parsed)) {
       logger.warn(`Cache corrupted (invalid structure): ${label}`, { filepath });
+      removeCacheFile(filepath);
+      return null;
+    }
+
+    // Check TTL
+    const cachedTime = new Date(parsed.cachedAt).getTime();
+    if (Date.now() - cachedTime > maxAgeMs) {
       removeCacheFile(filepath);
       return null;
     }

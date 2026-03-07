@@ -59,7 +59,7 @@ export async function callApi(
   const FINANCIAL_DATASETS_API_KEY = process.env.FINANCIAL_DATASETS_API_KEY;
 
   if (!FINANCIAL_DATASETS_API_KEY) {
-    logger.warn(`[Financial Datasets API] call without key: ${label}`);
+    throw new Error(`[Financial Datasets API] FINANCIAL_DATASETS_API_KEY not set`);
   }
 
   const url = new URL(`${BASE_URL}${endpoint}`);

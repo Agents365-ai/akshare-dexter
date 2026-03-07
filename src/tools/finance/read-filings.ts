@@ -249,6 +249,9 @@ export function createReadFilings(model: string): DynamicStructuredTool {
         systemPrompt: buildStep2Prompt(input.query, filingsResult.data, itemTypes),
         tools: STEP2_TOOLS,
       });
+      if (typeof step2Response === 'string') {
+        return formatToolResult({ error: 'Router returned text instead of tool calls', text: step2Response }, filingsResult.sourceUrls || []);
+      }
       const step2Message = step2Response as AIMessage;
 
       const step2ToolCalls = step2Message.tool_calls as ToolCall[];

@@ -161,6 +161,9 @@ export function createCnMarketSearch(model: string): DynamicStructuredTool {
         systemPrompt: buildRouterPrompt(),
         tools: CN_TOOLS,
       });
+      if (typeof response === 'string') {
+        return formatToolResult({ error: 'Router returned text instead of tool calls', text: response }, []);
+      }
       const aiMessage = response as AIMessage;
 
       const toolCalls = aiMessage.tool_calls as ToolCall[];
