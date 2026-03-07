@@ -10,6 +10,7 @@ import { editFileTool, EDIT_FILE_DESCRIPTION } from './filesystem/edit-file.js';
 import { FINANCIAL_SEARCH_DESCRIPTION } from './finance/financial-search.js';
 import { FINANCIAL_METRICS_DESCRIPTION } from './finance/financial-metrics.js';
 import { READ_FILINGS_DESCRIPTION } from './finance/read-filings.js';
+import { createCnMarketSearch, CN_MARKET_SEARCH_DESCRIPTION } from './tushare/index.js';
 import { heartbeatTool, HEARTBEAT_TOOL_DESCRIPTION } from './heartbeat/heartbeat-tool.js';
 import { discoverSkills } from '../skills/index.js';
 
@@ -80,6 +81,15 @@ export function getToolRegistry(model: string): RegisteredTool[] {
       description: HEARTBEAT_TOOL_DESCRIPTION,
     },
   ];
+
+  // Include cn_market_search if Tushare token is configured
+  if (process.env.TUSHARE_TOKEN) {
+    tools.push({
+      name: 'cn_market_search',
+      tool: createCnMarketSearch(model),
+      description: CN_MARKET_SEARCH_DESCRIPTION,
+    });
+  }
 
   // Include web_search if Exa, Perplexity, or Tavily API key is configured (Exa → Perplexity → Tavily)
   if (process.env.EXASEARCH_API_KEY) {
