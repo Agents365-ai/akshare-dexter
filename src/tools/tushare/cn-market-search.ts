@@ -12,9 +12,10 @@ import { getNorthboundFlow, getMarginData, getBlockTrade, getLimitList } from '.
 import { getConceptList, getConceptStocks } from './concept.js';
 import { getCnNews } from './news.js';
 import { getCnStockList, getTradeCalendar } from './stock-info.js';
+import { getHkStockList, getHkDaily, getHkDailyHistory } from './hk-stock.js';
 
 export const CN_MARKET_SEARCH_DESCRIPTION = `
-Intelligent meta-tool for Chinese A-share market data research. Takes a natural language query (Chinese or English) and automatically routes to appropriate Tushare data tools.
+Intelligent meta-tool for Chinese A-share and Hong Kong stock market data research. Takes a natural language query (Chinese or English) and automatically routes to appropriate Tushare data tools.
 
 ## When to Use
 
@@ -29,20 +30,22 @@ Intelligent meta-tool for Chinese A-share market data research. Takes a natural 
 - Concept/theme sectors (概念板块)
 - Chinese financial news
 - Stock code lookup by company name
+- Hong Kong stock prices and historical data (港股行情)
+- Hong Kong stock list and basic info (港股列表)
 
 ## When NOT to Use
 
 - US stocks or international markets (use financial_search instead)
-- Hong Kong stocks (not yet supported)
 - General web searches (use web_search)
-- Questions that don't require Chinese market data
+- Questions that don't require Chinese/HK market data
 
 ## Usage Notes
 
 - Accepts both Chinese and English queries
-- Handles company name → ts_code resolution (茅台 → 600519.SH, 宁德时代 → 300750.SZ)
+- Handles company name → ts_code resolution (茅台 → 600519.SH, 宁德时代 → 300750.SZ, 腾讯 → 00700.HK)
 - Date format: YYYYMMDD (no hyphens)
-- Stock code format: 000001.SZ (Shenzhen), 600519.SH (Shanghai), 830799.BJ (BSE)
+- A-share code format: 000001.SZ (Shenzhen), 600519.SH (Shanghai), 830799.BJ (BSE)
+- HK stock code format: 00700.HK (Tencent), 09988.HK (Alibaba)
 - Returns structured JSON data with source references
 `.trim();
 
@@ -53,6 +56,7 @@ const CN_TOOLS: StructuredToolInterface[] = [
   getConceptList, getConceptStocks,
   getCnNews,
   getCnStockList, getTradeCalendar,
+  getHkStockList, getHkDaily, getHkDailyHistory,
 ];
 
 const CN_TOOL_MAP = new Map(CN_TOOLS.map(t => [t.name, t]));
@@ -62,10 +66,10 @@ function formatSubToolName(name: string): string {
 }
 
 function buildRouterPrompt(): string {
-  return `You are a Chinese A-share market data routing assistant.
+  return `You are a Chinese A-share and Hong Kong stock market data routing assistant.
 Current date: ${getCurrentDate()}
 
-Given a user's query about Chinese stock market data, call the appropriate tool(s).
+Given a user's query about Chinese or Hong Kong stock market data, call the appropriate tool(s).
 
 ## Guidelines
 
@@ -75,17 +79,23 @@ Given a user's query about Chinese stock market data, call the appropriate tool(
    - 平安银行 → 000001.SZ
    - 比亚迪 → 002594.SZ
    - 中芯国际 → 688981.SH (STAR Market)
-   - If unsure, use get_cn_stock_list to look up by name
+   - 腾讯/腾讯控股 → 00700.HK
+   - 阿里巴巴 → 09988.HK
+   - 美团 → 03690.HK
+   - 小米集团 → 01810.HK
+   - If unsure about A-share, use get_cn_stock_list to look up by name
+   - If unsure about HK stock, use get_hk_stock_list to look up by name
    - Shanghai codes: 6xxxxx.SH, 688xxx.SH (STAR)
    - Shenzhen codes: 0xxxxx.SZ, 3xxxxx.SZ (ChiNext)
    - Beijing codes: 8xxxxx.BJ
+   - Hong Kong codes: xxxxx.HK (5-digit zero-padded)
 
 2. **Date Format**: Always YYYYMMDD (no hyphens)
    - "去年" → 20250101 to 20251231 (last year)
    - "最近一周" → 7 days ago to today
    - "2024年报" → period=20241231
 
-3. **Tool Selection**:
+3. **Tool Selection — A-shares**:
    - Current/recent price → get_cn_stock_price
    - Historical prices → get_cn_stock_prices
    - PE/PB/市值/换手率 → get_cn_stock_basic
@@ -102,7 +112,12 @@ Given a user's query about Chinese stock market data, call the appropriate tool(
    - 股票代码查询 → get_cn_stock_list
    - 交易日历 → get_trade_calendar
 
-4. **Efficiency**:
+4. **Tool Selection — Hong Kong Stocks (港股)**:
+   - 港股列表/港股代码查询 → get_hk_stock_list
+   - 港股当日行情/最新价格 → get_hk_daily
+   - 港股历史行情/港股K线 → get_hk_daily_history
+
+5. **Efficiency**:
    - Use specific fields when possible
    - For comparisons, call the same tool for each stock
 
@@ -116,13 +131,14 @@ const CnMarketSearchSchema = z.object({
 export function createCnMarketSearch(model: string): DynamicStructuredTool {
   return new DynamicStructuredTool({
     name: 'cn_market_search',
-    description: `Intelligent agentic search for Chinese A-share market data. Takes a natural language query (Chinese or English) and routes to appropriate data tools. Use for:
+    description: `Intelligent agentic search for Chinese A-share and Hong Kong stock market data. Takes a natural language query (Chinese or English) and routes to appropriate data tools. Use for:
 - A-share stock prices and valuations (PE, PB, market cap)
 - Chinese company financials (income, balance sheet, cash flow)
 - Northbound/southbound capital flows (北向资金)
 - Margin trading, block trades, limit up/down lists
 - Concept/theme sectors (概念板块)
-- Chinese financial news`,
+- Chinese financial news
+- Hong Kong stock prices, history, and stock list (港股行情)`,
     schema: CnMarketSearchSchema,
     func: async (input, _runManager, config?: RunnableConfig) => {
       const onProgress = config?.metadata?.onProgress as ((msg: string) => void) | undefined;
