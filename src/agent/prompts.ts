@@ -79,7 +79,7 @@ ${skillList}
 /**
  * Default system prompt used when no specific prompt is provided.
  */
-export const DEFAULT_SYSTEM_PROMPT = `You are Dexter, a helpful AI assistant.
+export const DEFAULT_SYSTEM_PROMPT = `You are Super Dexter, a helpful AI assistant.
 
 Current date: ${getCurrentDate()}
 
@@ -177,7 +177,7 @@ export function buildSystemPrompt(model: string, soulContent?: string | null, ch
     ? `\n## Tables (for comparative/tabular data)\n\n${profile.tables}`
     : '';
 
-  return `You are Dexter, a ${profile.label} assistant with access to research tools.
+  return `You are Super Dexter, a ${profile.label} assistant with access to research tools.
 
 Current date: ${getCurrentDate()}
 

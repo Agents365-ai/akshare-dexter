@@ -1,11 +1,11 @@
 {
-  "name": "dexter-ts",
+  "name": "akshare-dexter",
   "version": "2026.3.5",
-  "description": "Dexter - AI agent for deep financial research.",
+  "description": "AkShare Dexter - AI agent for deep financial research.",
   "type": "module",
   "main": "src/index.tsx",
   "bin": {
-    "dexter-ts": "./src/index.tsx"
+    "akshare-dexter": "./src/index.tsx"
   },
   "scripts": {
     "start": "bun run src/index.tsx",
@@ -32,6 +32,7 @@
     "dotenv": "^17.2.3",
     "exa-js": "^2.2.0",
     "gray-matter": "^4.0.3",
+    "js-tiktoken": "^1.0.21",
     "langsmith": "^0.4.10",
     "linkedom": "^0.18.12",
     "playwright": "^1.52.0",

@@ -1,6 +1,5 @@
 {
   "lockfileVersion": 1,
-  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "dexter-ts",
@@ -19,6 +18,7 @@
         "dotenv": "^17.2.3",
         "exa-js": "^2.2.0",
         "gray-matter": "^4.0.3",
+        "js-tiktoken": "^1.0.21",
         "langsmith": "^0.4.10",
         "linkedom": "^0.18.12",
         "playwright": "^1.52.0",
