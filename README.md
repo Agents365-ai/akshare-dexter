@@ -184,6 +184,55 @@ Then open WhatsApp, go to your own chat (message yourself), and ask Dexter a que
 
 For detailed setup instructions, configuration options, and troubleshooting, see the [WhatsApp Gateway README](src/gateway/channels/whatsapp/README.md).
 
+## 🔌 MCP Server (OpenClaw / Claude Desktop)
+
+Dexter exposes its financial research tools via [MCP (Model Context Protocol)](https://modelcontextprotocol.io/), enabling integration with OpenClaw, Claude Desktop, and other MCP clients.
+
+**Start the MCP server:**
+```bash
+bun run mcp
+```
+
+**Available MCP tools:**
+
+| Tool | Description |
+|------|-------------|
+| `financial_search` | US stock prices, financials, metrics, news |
+| `financial_metrics` | Fundamental analysis (income, balance sheet, cash flow) |
+| `read_filings` | SEC filing content (10-K, 10-Q, 8-K) |
+| `cn_market_search` | Chinese A-share data (requires `TUSHARE_TOKEN`) |
+| `web_search` | Web search (requires `EXASEARCH_API_KEY` or alternatives) |
+| `web_fetch` | Fetch and extract web page content |
+| `x_search` | X/Twitter sentiment search (requires `X_BEARER_TOKEN`) |
+
+**OpenClaw configuration** (`~/.openclaw/openclaw.json`):
+```json
+{
+  "mcpServers": {
+    "akshare-dexter": {
+      "command": "bun",
+      "args": ["run", "src/mcp-server.ts"],
+      "cwd": "/path/to/akshare-dexter"
+    }
+  }
+}
+```
+
+**Claude Desktop configuration** (`claude_desktop_config.json`):
+```json
+{
+  "mcpServers": {
+    "akshare-dexter": {
+      "command": "bun",
+      "args": ["run", "src/mcp-server.ts"],
+      "cwd": "/path/to/akshare-dexter"
+    }
+  }
+}
+```
+
+Meta-tools (`financial_search`, `cn_market_search`) use an LLM internally for routing. Set `DEFAULT_MODEL` env var (default: `deepseek-chat`).
+
 ## 🤝 How to Contribute
 
 1. Fork the repository

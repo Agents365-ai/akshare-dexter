@@ -184,6 +184,55 @@ bun run gateway
 
 详细的设置说明、配置选项和故障排查，请参阅 [WhatsApp Gateway README](src/gateway/channels/whatsapp/README.md)。
 
+## 🔌 MCP 服务器（OpenClaw / Claude Desktop）
+
+Dexter 通过 [MCP（模型上下文协议）](https://modelcontextprotocol.io/) 对外暴露金融研究工具，支持 OpenClaw、Claude Desktop 等 MCP 客户端接入。
+
+**启动 MCP 服务器：**
+```bash
+bun run mcp
+```
+
+**可用 MCP 工具：**
+
+| 工具 | 说明 |
+|------|------|
+| `financial_search` | 美股价格、财报、指标、新闻 |
+| `financial_metrics` | 基本面分析（利润表、资产负债表、现金流） |
+| `read_filings` | SEC 文件内容（10-K、10-Q、8-K） |
+| `cn_market_search` | A 股数据（需要 `TUSHARE_TOKEN`） |
+| `web_search` | 网页搜索（需要 `EXASEARCH_API_KEY` 等） |
+| `web_fetch` | 网页内容抓取 |
+| `x_search` | X/Twitter 舆情搜索（需要 `X_BEARER_TOKEN`） |
+
+**OpenClaw 配置** (`~/.openclaw/openclaw.json`)：
+```json
+{
+  "mcpServers": {
+    "akshare-dexter": {
+      "command": "bun",
+      "args": ["run", "src/mcp-server.ts"],
+      "cwd": "/你的/akshare-dexter/路径"
+    }
+  }
+}
+```
+
+**Claude Desktop 配置** (`claude_desktop_config.json`)：
+```json
+{
+  "mcpServers": {
+    "akshare-dexter": {
+      "command": "bun",
+      "args": ["run", "src/mcp-server.ts"],
+      "cwd": "/你的/akshare-dexter/路径"
+    }
+  }
+}
+```
+
+元工具（`financial_search`、`cn_market_search`）内部使用 LLM 进行路由，通过 `DEFAULT_MODEL` 环境变量配置（默认：`deepseek-chat`）。
+
 ## 🤝 参与贡献
 
 1. Fork 本仓库
