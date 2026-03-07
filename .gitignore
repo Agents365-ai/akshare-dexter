@@ -49,6 +49,12 @@ yarn-error.log*
 # UV
 .uv/
 
+# Claude Code
+CLAUDE.md
+
+# Documentation build artifacts
+docs/
+
 # Cursor files
 .cursor/
 

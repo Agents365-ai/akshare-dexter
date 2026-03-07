@@ -1,8 +1,8 @@
-# AkShare Dexter 🤖
+# AK-Share Dexter 🤖
 
 AkShare Dexter is an autonomous financial research agent that thinks, plans, and learns as it works. It performs analysis using task planning, self-reflection, and real-time market data. Think Claude Code, but built specifically for financial research. Supports both US and Chinese A-share markets.
 
-<img width="1098" height="659" alt="Screenshot 2026-01-21 at 5 25 10 PM" src="https://github.com/user-attachments/assets/3bcc3a7f-b68a-4f5e-8735-9d22196ff76e" />
+<img width="1098" alt="AK-Share Dexter Banner" src="docs/banner.png" />
 
 ## Table of Contents
 
@@ -27,8 +27,6 @@ Dexter takes complex financial questions and turns them into clear, step-by-step
 - **Self-Validation**: Checks its own work and iterates until tasks are complete
 - **Real-Time Financial Data**: Access to income statements, balance sheets, and cash flow statements
 - **Safety Features**: Built-in loop detection and step limits to prevent runaway execution
-
-[![Twitter Follow](https://img.shields.io/twitter/follow/virattt?style=social)](https://twitter.com/virattt) [![Discord](https://img.shields.io/badge/Discord-Join%20Server-5865F2?style=social&logo=discord)](https://discord.gg/jpGHv2XB6T)
 
 <img width="1042" height="638" alt="Screenshot 2026-02-18 at 12 21 25 PM" src="https://github.com/user-attachments/assets/2a6334f9-863f-4bd2-a56f-923e42f4711e" />
 
@@ -178,3 +176,34 @@ For detailed setup instructions, configuration options, and troubleshooting, see
 ## 📄 License
 
 This project is licensed under the MIT License.
+
+## Support
+
+If this project helps you, consider supporting the author:
+
+<table>
+  <tr>
+    <td align="center">
+      <img src="https://raw.githubusercontent.com/Agents365-ai/images_payment/main/qrcode/wechat-pay.png" width="180" alt="WeChat Pay">
+      <br>
+      <b>WeChat Pay</b>
+    </td>
+    <td align="center">
+      <img src="https://raw.githubusercontent.com/Agents365-ai/images_payment/main/qrcode/alipay.png" width="180" alt="Alipay">
+      <br>
+      <b>Alipay</b>
+    </td>
+    <td align="center">
+      <img src="https://raw.githubusercontent.com/Agents365-ai/images_payment/main/qrcode/buymeacoffee.png" width="180" alt="Buy Me a Coffee">
+      <br>
+      <b>Buy Me a Coffee</b>
+    </td>
+  </tr>
+</table>
+
+## Author
+
+**Agents365-ai**
+
+- Bilibili: https://space.bilibili.com/441831884
+- GitHub: https://github.com/Agents365-ai
