@@ -2,7 +2,7 @@
 
 [中文文档](README_CN.md)
 
-AK-Share Dexter is an autonomous financial research agent that thinks, plans, and learns as it works. It performs analysis using task planning, self-reflection, and real-time market data. Think Claude Code, but built specifically for financial research. Supports **US stocks**, **Chinese A-shares** (via Tushare Pro), and **Hong Kong stocks** (coming soon).
+AK-Share Dexter is an autonomous financial research agent that thinks, plans, and learns as it works. It performs analysis using task planning, self-reflection, and real-time market data. Think Claude Code, but built specifically for financial research. Supports **US stocks**, **Chinese A-shares**, and **Hong Kong stocks** (via Tushare Pro).
 
 <img width="1098" alt="AK-Share Dexter Banner" src="images/banner.png" />
 
@@ -27,8 +27,8 @@ Dexter takes complex financial questions and turns them into clear, step-by-step
 - **Intelligent Task Planning**: Automatically decomposes complex queries into structured research steps
 - **Autonomous Execution**: Selects and executes the right tools to gather financial data
 - **Self-Validation**: Checks its own work and iterates until tasks are complete
-- **Multi-Market Support**: US stocks (Financial Datasets API), Chinese A-shares (Tushare Pro), Hong Kong stocks (planned)
-- **A-Share Data**: Daily quotes, PE/PB/PS valuation, financial statements, northbound flows, margin data, limit up/down, concept sectors
+- **Multi-Market Support**: US stocks (Financial Datasets API), Chinese A-shares & Hong Kong stocks (Tushare Pro)
+- **A-Share & HK Data**: Daily quotes, PE/PB/PS valuation, financial statements, northbound flows, margin data, limit up/down, concept sectors, HK stock prices, financials & Stock Connect holdings
 - **Real-Time Financial Data**: Income statements, balance sheets, cash flow statements, and key financial indicators
 - **Multiple LLM Providers**: OpenAI, Anthropic, DeepSeek, Google, xAI, Ollama, OpenRouter, and more
 - **Safety Features**: Built-in loop detection and step limits to prevent runaway execution
@@ -55,9 +55,27 @@ Dexter takes complex financial questions and turns them into clear, step-by-step
 
 | Source | Env Variable | Market | Get Key |
 |--------|-------------|--------|---------|
-| Tushare Pro | `TUSHARE_TOKEN` | Chinese A-shares | [tushare.pro](https://tushare.pro) |
+| Tushare Pro | `TUSHARE_TOKEN` | Chinese A-shares & HK stocks | [tushare.pro](https://tushare.pro) |
 | Financial Datasets | `FINANCIAL_DATASETS_API_KEY` | US stocks | [financialdatasets.ai](https://financialdatasets.ai) |
 | Exa | `EXASEARCH_API_KEY` | Web search | [exa.ai](https://exa.ai) |
+
+**Tushare Data Coverage** (current support, more coming soon):
+
+| Category | Description | API |
+|----------|-------------|-----|
+| Stock List | A-share & HK stock directory, trade calendar | `stock_basic`, `hk_basic`, `trade_cal` |
+| Daily Prices | Daily/weekly/monthly OHLCV for A-shares & HK | `daily`, `hk_daily` |
+| Valuation | PE, PB, PS, market cap, turnover | `daily_basic` |
+| Financial Statements | Income, balance sheet, cash flow (A-shares) | `income`, `balancesheet`, `cashflow` |
+| Financial Indicators | ROE, ROA, margins, growth rates (A-shares) | `fina_indicator` |
+| HK Financials | HK income, balance sheet, cash flow, indicators | `hk_income`, `hk_balancesheet`, `hk_cashflow`, `hk_fina_indicator` |
+| Stock Connect Holdings | Cross-border holdings data (沪深港通持股) | `hk_hold` |
+| Capital Flows | Northbound/southbound Stock Connect flows | `moneyflow_hsgt` |
+| Margin Trading | Margin balance and trading data | `margin` |
+| Block Trades | Large block trade records | `block_trade` |
+| Limit Up/Down | Daily limit up/down stock lists | `stk_limit` |
+| Concepts | Theme/concept sectors and constituents | `concept`, `concept_detail` |
+| News | Major financial news | `major_news` |
 
 #### Installing Bun
 

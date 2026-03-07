@@ -4,5 +4,5 @@ export { getNorthboundFlow, getMarginData, getBlockTrade, getLimitList } from '.
 export { getConceptList, getConceptStocks } from './concept.js';
 export { getCnNews } from './news.js';
 export { getCnStockList, getTradeCalendar } from './stock-info.js';
-export { getHkStockList, getHkDaily, getHkDailyHistory } from './hk-stock.js';
+export { getHkStockList, getHkDaily, getHkDailyHistory, getHkIncome, getHkBalanceSheet, getHkCashflow, getHkFinaIndicator, getHkHold } from './hk-stock.js';
 export { createCnMarketSearch, CN_MARKET_SEARCH_DESCRIPTION } from './cn-market-search.js';

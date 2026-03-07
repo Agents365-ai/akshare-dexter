@@ -12,7 +12,7 @@ import { getNorthboundFlow, getMarginData, getBlockTrade, getLimitList } from '.
 import { getConceptList, getConceptStocks } from './concept.js';
 import { getCnNews } from './news.js';
 import { getCnStockList, getTradeCalendar } from './stock-info.js';
-import { getHkStockList, getHkDaily, getHkDailyHistory } from './hk-stock.js';
+import { getHkStockList, getHkDaily, getHkDailyHistory, getHkIncome, getHkBalanceSheet, getHkCashflow, getHkFinaIndicator, getHkHold } from './hk-stock.js';
 
 export const CN_MARKET_SEARCH_DESCRIPTION = `
 Intelligent meta-tool for Chinese A-share and Hong Kong stock market data research. Takes a natural language query (Chinese or English) and automatically routes to appropriate Tushare data tools.
@@ -32,6 +32,9 @@ Intelligent meta-tool for Chinese A-share and Hong Kong stock market data resear
 - Stock code lookup by company name
 - Hong Kong stock prices and historical data (港股行情)
 - Hong Kong stock list and basic info (港股列表)
+- Hong Kong company financial statements (港股财报: income, balance sheet, cash flow)
+- Hong Kong financial indicators (港股ROE/EPS/margins)
+- Stock Connect holdings data (沪深港通持股)
 
 ## When NOT to Use
 
@@ -57,6 +60,8 @@ const CN_TOOLS: StructuredToolInterface[] = [
   getCnNews,
   getCnStockList, getTradeCalendar,
   getHkStockList, getHkDaily, getHkDailyHistory,
+  getHkIncome, getHkBalanceSheet, getHkCashflow, getHkFinaIndicator,
+  getHkHold,
 ];
 
 const CN_TOOL_MAP = new Map(CN_TOOLS.map(t => [t.name, t]));
@@ -116,6 +121,11 @@ Given a user's query about Chinese or Hong Kong stock market data, call the appr
    - 港股列表/港股代码查询 → get_hk_stock_list
    - 港股当日行情/最新价格 → get_hk_daily
    - 港股历史行情/港股K线 → get_hk_daily_history
+   - 港股利润表/港股营收/港股净利润 → get_hk_income
+   - 港股资产负债表/港股资产/港股负债 → get_hk_balance_sheet
+   - 港股现金流/港股经营现金流 → get_hk_cashflow
+   - 港股ROE/港股EPS/港股财务指标 → get_hk_fina_indicator
+   - 沪深港通持股/港股通持股/北向持股 → get_hk_hold
 
 5. **Efficiency**:
    - Use specific fields when possible
@@ -138,7 +148,9 @@ export function createCnMarketSearch(model: string): DynamicStructuredTool {
 - Margin trading, block trades, limit up/down lists
 - Concept/theme sectors (概念板块)
 - Chinese financial news
-- Hong Kong stock prices, history, and stock list (港股行情)`,
+- Hong Kong stock prices, history, and stock list (港股行情)
+- Hong Kong company financials and indicators (港股财报/财务指标)
+- Stock Connect holdings (沪深港通持股)`,
     schema: CnMarketSearchSchema,
     func: async (input, _runManager, config?: RunnableConfig) => {
       const onProgress = config?.metadata?.onProgress as ((msg: string) => void) | undefined;
