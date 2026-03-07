@@ -2,7 +2,9 @@
 import 'dotenv/config';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { z } from 'zod';
 import { getToolRegistry } from './tools/registry.js';
+import { Agent } from './agent/agent.js';
 
 const EXCLUDED_TOOLS = new Set([
   'browser',    // Stateful Playwright session, not suitable for MCP
@@ -32,7 +34,7 @@ for (const entry of registry) {
     entry.name,
     entry.description,
     (tool.schema as any).shape,
-    async (args) => {
+    async (args: Record<string, unknown>) => {
       try {
         const result = await tool.invoke(args);
         const text = typeof result === 'string' ? result : JSON.stringify(result);
@@ -48,6 +50,25 @@ for (const entry of registry) {
   );
   exposed.push(entry.name);
 }
+
+// Research tool: full agent loop via MCP
+server.tool(
+  'research',
+  'Run Dexter autonomous financial research agent. Accepts a natural language query, plans tasks, calls tools, validates results, and returns a complete research report. Use this for complex multi-step analysis instead of calling individual tools.',
+  { query: z.string().describe('Natural language research query (e.g. "Analyze Apple revenue trend over the last 3 years")'), model: z.string().optional().describe('LLM model to use (defaults to server default)') },
+  async (args) => {
+    const agent = await Agent.create({
+      model: args.model || model,
+      maxIterations: 10,
+    });
+    let answer = '';
+    for await (const event of agent.run(args.query)) {
+      if (event.type === 'done') answer = event.answer;
+    }
+    return { content: [{ type: 'text' as const, text: answer || 'No answer generated.' }] };
+  },
+);
+exposed.push('research');
 
 process.stderr.write(`[akshare-dexter] MCP server ready. Tools: ${exposed.join(', ')}\n`);
 

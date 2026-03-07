@@ -222,6 +222,7 @@ bun run mcp
 | `web_search` | 网页搜索（需要 `EXASEARCH_API_KEY` 等） |
 | `web_fetch` | 网页内容抓取 |
 | `x_search` | X/Twitter 舆情搜索（需要 `X_BEARER_TOKEN`） |
+| `research` | 完整自主研究代理——多步推理、工具编排、生成研究报告 |
 
 **OpenClaw 配置** (`~/.openclaw/openclaw.json`)：
 ```json

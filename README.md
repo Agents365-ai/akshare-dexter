@@ -202,7 +202,7 @@ Then open WhatsApp, go to your own chat (message yourself), and ask Dexter a que
 
 For detailed setup instructions, configuration options, and troubleshooting, see the [WhatsApp Gateway README](src/gateway/channels/whatsapp/README.md).
 
-## 🔌 MCP Server (OpenClaw / Claude Desktop)
+## 🔌 MCP Server (OpenClaw)
 
 Dexter exposes its financial research tools via [MCP (Model Context Protocol)](https://modelcontextprotocol.io/), enabling integration with OpenClaw, Claude Desktop, and other MCP clients.
 
@@ -222,6 +222,7 @@ bun run mcp
 | `web_search` | Web search (requires `EXASEARCH_API_KEY` or alternatives) |
 | `web_fetch` | Fetch and extract web page content |
 | `x_search` | X/Twitter sentiment search (requires `X_BEARER_TOKEN`) |
+| `research` | Full autonomous agent loop — multi-step reasoning, tool orchestration, and final report |
 
 **OpenClaw configuration** (`~/.openclaw/openclaw.json`):
 ```json
