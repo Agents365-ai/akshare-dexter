@@ -75,6 +75,9 @@ export class Scratchpad {
   // Stores indices of tool_result entries that have been cleared from context
   private clearedToolIndices: Set<number> = new Set();
 
+  // In-memory entry cache to avoid re-reading JSONL file on every method call
+  private entriesCache: ScratchpadEntry[] = [];
+
   constructor(query: string, limitConfig?: Partial<ToolLimitConfig>) {
     this.limitConfig = { ...DEFAULT_LIMIT_CONFIG, ...limitConfig };
 
@@ -429,6 +432,7 @@ export class Scratchpad {
    */
   private append(entry: ScratchpadEntry): void {
     appendFileSync(this.filepath, JSON.stringify(entry) + '\n');
+    this.entriesCache.push(entry);
   }
 
   /**
@@ -451,14 +455,6 @@ export class Scratchpad {
    * a single bad line crashing tool-context methods.
    */
   private readEntries(): ScratchpadEntry[] {
-    if (!existsSync(this.filepath)) {
-      return [];
-    }
-
-    return readFileSync(this.filepath, 'utf-8')
-      .split('\n')
-      .filter((line) => line.trim())
-      .map((line) => this.parseLine(line))
-      .filter((entry): entry is ScratchpadEntry => entry !== null);
+    return this.entriesCache;
   }
 }

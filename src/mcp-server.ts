@@ -57,13 +57,28 @@ server.tool(
   'Run Dexter autonomous financial research agent. Accepts a natural language query, plans tasks, calls tools, validates results, and returns a complete research report. Use this for complex multi-step analysis instead of calling individual tools.',
   { query: z.string().describe('Natural language research query (e.g. "Analyze Apple revenue trend over the last 3 years")'), model: z.string().optional().describe('LLM model to use (defaults to server default)') },
   async (args) => {
+    const RESEARCH_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
     const agent = await Agent.create({
       model: args.model || model,
       maxIterations: 10,
     });
     let answer = '';
-    for await (const event of agent.run(args.query)) {
-      if (event.type === 'done') answer = event.answer;
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Research timed out after 5 minutes')), RESEARCH_TIMEOUT_MS)
+    );
+    const research = async () => {
+      for await (const event of agent.run(args.query)) {
+        if (event.type === 'done') answer = event.answer;
+      }
+      return answer;
+    };
+    try {
+      await Promise.race([research(), timeout]);
+    } catch (err) {
+      if (!answer) {
+        const message = err instanceof Error ? err.message : String(err);
+        return { content: [{ type: 'text' as const, text: `Error: ${message}` }], isError: true };
+      }
     }
     return { content: [{ type: 'text' as const, text: answer || 'No answer generated.' }] };
   },

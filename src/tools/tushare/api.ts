@@ -1,7 +1,7 @@
 import { readCache, writeCache, describeRequest } from '../../utils/cache.js';
 import { logger } from '../../utils/logger.js';
 
-const TUSHARE_API_URL = 'http://api.tushare.pro';
+const TUSHARE_API_URL = 'https://api.tushare.pro';
 
 export interface TushareRawResponse {
   fields: string[];
