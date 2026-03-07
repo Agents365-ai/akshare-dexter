@@ -1,6 +1,8 @@
 # AK-Share Dexter 🤖
 
-AkShare Dexter is an autonomous financial research agent that thinks, plans, and learns as it works. It performs analysis using task planning, self-reflection, and real-time market data. Think Claude Code, but built specifically for financial research. Supports both US and Chinese A-share markets.
+[中文文档](README_CN.md)
+
+AK-Share Dexter is an autonomous financial research agent that thinks, plans, and learns as it works. It performs analysis using task planning, self-reflection, and real-time market data. Think Claude Code, but built specifically for financial research. Supports **US stocks**, **Chinese A-shares** (via Tushare Pro), and **Hong Kong stocks** (coming soon).
 
 <img width="1098" alt="AK-Share Dexter Banner" src="images/banner.png" />
 
@@ -25,7 +27,10 @@ Dexter takes complex financial questions and turns them into clear, step-by-step
 - **Intelligent Task Planning**: Automatically decomposes complex queries into structured research steps
 - **Autonomous Execution**: Selects and executes the right tools to gather financial data
 - **Self-Validation**: Checks its own work and iterates until tasks are complete
-- **Real-Time Financial Data**: Access to income statements, balance sheets, and cash flow statements
+- **Multi-Market Support**: US stocks (Financial Datasets API), Chinese A-shares (Tushare Pro), Hong Kong stocks (planned)
+- **A-Share Data**: Daily quotes, PE/PB/PS valuation, financial statements, northbound flows, margin data, limit up/down, concept sectors
+- **Real-Time Financial Data**: Income statements, balance sheets, cash flow statements, and key financial indicators
+- **Multiple LLM Providers**: OpenAI, Anthropic, DeepSeek, Google, xAI, Ollama, OpenRouter, and more
 - **Safety Features**: Built-in loop detection and step limits to prevent runaway execution
 
 <img width="1042" height="638" alt="Screenshot 2026-02-18 at 12 21 25 PM" src="https://github.com/user-attachments/assets/2a6334f9-863f-4bd2-a56f-923e42f4711e" />
@@ -34,9 +39,25 @@ Dexter takes complex financial questions and turns them into clear, step-by-step
 ## ✅ Prerequisites
 
 - [Bun](https://bun.com) runtime (v1.0 or higher)
-- OpenAI API key (get [here](https://platform.openai.com/api-keys))
-- Financial Datasets API key (get [here](https://financialdatasets.ai))
-- Exa API key (get [here](https://exa.ai)) - optional, for web search
+- At least one LLM API key (see table below)
+
+**LLM Providers** (choose one or more):
+
+| Provider | Env Variable | Notes |
+|----------|-------------|-------|
+| DeepSeek | `DEEPSEEK_API_KEY` | Recommended for Chinese market research |
+| OpenAI | `OPENAI_API_KEY` | GPT-4o, o1-mini |
+| Anthropic | `ANTHROPIC_API_KEY` | Claude series |
+| Google | `GOOGLE_API_KEY` | Gemini series |
+| Ollama | `OLLAMA_BASE_URL` | Local LLM, free |
+
+**Data Sources** (optional, enables market-specific tools):
+
+| Source | Env Variable | Market | Get Key |
+|--------|-------------|--------|---------|
+| Tushare Pro | `TUSHARE_TOKEN` | Chinese A-shares | [tushare.pro](https://tushare.pro) |
+| Financial Datasets | `FINANCIAL_DATASETS_API_KEY` | US stocks | [financialdatasets.ai](https://financialdatasets.ai) |
+| Exa | `EXASEARCH_API_KEY` | Web search | [exa.ai](https://exa.ai) |
 
 #### Installing Bun
 
@@ -75,20 +96,21 @@ bun install
 # Copy the example environment file
 cp env.example .env
 
-# Edit .env and add your API keys (if using cloud providers)
+# Edit .env and add your API keys
+
+# === LLM Provider (at least one required) ===
+# DEEPSEEK_API_KEY=your-deepseek-api-key
 # OPENAI_API_KEY=your-openai-api-key
-# ANTHROPIC_API_KEY=your-anthropic-api-key (optional)
-# GOOGLE_API_KEY=your-google-api-key (optional)
-# XAI_API_KEY=your-xai-api-key (optional)
-# OPENROUTER_API_KEY=your-openrouter-api-key (optional)
-
-# Institutional-grade market data for agents; AAPL, NVDA, MSFT are free
-# FINANCIAL_DATASETS_API_KEY=your-financial-datasets-api-key
-
-# (Optional) If using Ollama locally
+# ANTHROPIC_API_KEY=your-anthropic-api-key
 # OLLAMA_BASE_URL=http://127.0.0.1:11434
 
-# Web Search (Exa preferred, Tavily fallback)
+# === Chinese A-Share Market (Tushare Pro) ===
+# TUSHARE_TOKEN=your-tushare-token
+
+# === US Stock Market ===
+# FINANCIAL_DATASETS_API_KEY=your-financial-datasets-api-key
+
+# === Web Search (optional) ===
 # EXASEARCH_API_KEY=your-exa-api-key
 # TAVILY_API_KEY=your-tavily-api-key
 ```
@@ -175,7 +197,7 @@ For detailed setup instructions, configuration options, and troubleshooting, see
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the [Apache License 2.0](LICENSE).
 
 ## Support
 
