@@ -1,287 +1,95 @@
-# AK-Share Dexter 🤖
+# AK-Share Dexter 🤖 — 自主金融研究智能体
 
-[中文文档](README_CN.md)
+[English](README_EN.md)
 
-AK-Share Dexter is an autonomous financial research agent that thinks, plans, and learns as it works. It performs analysis using task planning, self-reflection, and real-time market data. Think Claude Code, but built specifically for financial research. Supports **US stocks**, **Chinese A-shares**, and **Hong Kong stocks** (via Tushare Pro).
+> 像 Claude Code 一样思考和行动，但专为金融研究打造。支持美股、A 股、港股三大市场。
 
 <img width="1098" alt="AK-Share Dexter Banner" src="images/banner.png" />
 
-## Table of Contents
+## 🆓 免费使用
 
-- [👋 Overview](#-overview)
-- [✅ Prerequisites](#-prerequisites)
-- [💻 How to Install](#-how-to-install)
-- [🚀 How to Run](#-how-to-run)
-- [📊 How to Evaluate](#-how-to-evaluate)
-- [🐛 How to Debug](#-how-to-debug)
-- [📱 How to Use with WhatsApp](#-how-to-use-with-whatsapp)
-- [🤝 How to Contribute](#-how-to-contribute)
-- [📄 License](#-license)
+通过 **飞书 + OpenClaw** 即可免费使用 Dexter 的全部金融研究能力。
 
+**关注频道 → 加入即可使用，无需安装任何软件。**
 
-## 👋 Overview
+<!-- TODO: 飞书频道链接/二维码 -->
 
-Dexter takes complex financial questions and turns them into clear, step-by-step research plans. It runs those tasks using live market data, checks its own work, and refines the results until it has a confident, data-backed answer.  
+---
 
-**Key Capabilities:**
-- **Intelligent Task Planning**: Automatically decomposes complex queries into structured research steps
-- **Autonomous Execution**: Selects and executes the right tools to gather financial data
-- **Self-Validation**: Checks its own work and iterates until tasks are complete
-- **Multi-Market Support**: US stocks (Financial Datasets API), Chinese A-shares & Hong Kong stocks (Tushare Pro)
-- **A-Share & HK Data**: Daily quotes, PE/PB/PS valuation, financial statements, northbound flows, margin data, limit up/down, concept sectors, HK stock prices, financials & Stock Connect holdings
-- **Real-Time Financial Data**: Income statements, balance sheets, cash flow statements, and key financial indicators
-- **Multiple LLM Providers**: OpenAI, Anthropic, DeepSeek, Google, xAI, Ollama, OpenRouter, and more
-- **Safety Features**: Built-in loop detection and step limits to prevent runaway execution
+## 🎯 它能做什么
 
-<img width="1042" height="638" alt="Screenshot 2026-02-18 at 12 21 25 PM" src="https://github.com/user-attachments/assets/2a6334f9-863f-4bd2-a56f-923e42f4711e" />
+直接用自然语言提问，Dexter 自动规划研究步骤、调用数据工具、验证结果、生成完整报告。
 
+| 问题示例 | Dexter 做了什么 |
+|----------|----------------|
+| 分析腾讯 2024 年财务表现 | 拉取港股利润表、资产负债表、现金流、财务指标，横向对比后生成分析报告 |
+| 比较茅台和五粮液的估值 | 获取两只股票的 PE/PB/PS、市值、营收增长，输出对比表格和投资观点 |
+| Apple revenue trend last 3 years | Pulls income statements, computes YoY growth, charts the trend |
+| 最近北向资金流入了哪些股票 | 查询沪深港通资金流向和持股变动，识别资金重点流入标的 |
+| 比亚迪 vs 特斯拉 投资价值 | 跨市场调取两家公司财务数据、估值指标、行业趋势，生成对比研究报告 |
 
-## ✅ Prerequisites
+## ⚡ 核心能力
 
-- [Bun](https://bun.com) runtime (v1.0 or higher)
-- At least one LLM API key (see table below)
+- **智能任务规划** — 自动将复杂问题拆解为多步研究计划
+- **自主执行** — 选择合适的工具获取数据，无需人工干预
+- **自我验证** — 检查结果、发现不足、自动补充研究
+- **三大市场覆盖** — 美股、A 股、港股实时数据
+- **多模型支持** — OpenAI、Anthropic、DeepSeek、Google、Ollama 等
+- **安全机制** — 内置循环检测和步骤限制，防止失控执行
 
-**LLM Providers** (choose one or more):
+## 🔄 工作原理
 
-| Provider | Env Variable | Notes |
-|----------|-------------|-------|
-| DeepSeek | `DEEPSEEK_API_KEY` | Recommended for Chinese market research |
-| OpenAI | `OPENAI_API_KEY` | GPT-4o, o1-mini |
-| Anthropic | `ANTHROPIC_API_KEY` | Claude series |
-| Google | `GOOGLE_API_KEY` | Gemini series |
-| Ollama | `OLLAMA_BASE_URL` | Local LLM, free |
-
-**Data Sources** (optional, enables market-specific tools):
-
-| Source | Env Variable | Market | Get Key |
-|--------|-------------|--------|---------|
-| Tushare Pro | `TUSHARE_TOKEN` | Chinese A-shares & HK stocks | [tushare.pro](https://tushare.pro) |
-| Financial Datasets | `FINANCIAL_DATASETS_API_KEY` | US stocks | [financialdatasets.ai](https://financialdatasets.ai) |
-| Exa | `EXASEARCH_API_KEY` | Web search | [exa.ai](https://exa.ai) |
-
-**Tushare Data Coverage** (current support, more coming soon):
-
-| Category | Description | API |
-|----------|-------------|-----|
-| Stock List | A-share & HK stock directory, trade calendar | `stock_basic`, `hk_basic`, `trade_cal` |
-| Daily Prices | Daily/weekly/monthly OHLCV for A-shares & HK | `daily`, `hk_daily` |
-| Valuation | PE, PB, PS, market cap, turnover | `daily_basic` |
-| Financial Statements | Income, balance sheet, cash flow (A-shares) | `income`, `balancesheet`, `cashflow` |
-| Financial Indicators | ROE, ROA, margins, growth rates (A-shares) | `fina_indicator` |
-| HK Financials | HK income, balance sheet, cash flow, indicators | `hk_income`, `hk_balancesheet`, `hk_cashflow`, `hk_fina_indicator` |
-| Stock Connect Holdings | Cross-border holdings data (沪深港通持股) | `hk_hold` |
-| Capital Flows | Northbound/southbound Stock Connect flows | `moneyflow_hsgt` |
-| Margin Trading | Margin balance and trading data | `margin` |
-| Block Trades | Large block trade records | `block_trade` |
-| Limit Up/Down | Daily limit up/down stock lists | `stk_limit` |
-| Concepts | Theme/concept sectors and constituents | `concept`, `concept_detail` |
-| News | Major financial news | `major_news` |
-
-#### Installing Bun
-
-If you don't have Bun installed, you can install it using curl:
-
-**macOS/Linux:**
-```bash
-curl -fsSL https://bun.com/install | bash
+```
+用户提问 → 规划研究步骤 → 调用数据工具 → 自我验证 → 生成研究报告
 ```
 
-**Windows:**
-```bash
-powershell -c "irm bun.sh/install.ps1|iex"
-```
+Dexter 不是简单的问答。它像一个真正的研究员：先制定计划，再逐步执行，遇到问题会回头补充数据，直到给出有数据支撑的完整答案。
 
-After installation, restart your terminal and verify Bun is installed:
-```bash
-bun --version
-```
+## 📊 数据覆盖
 
-## 💻 How to Install
+### A 股 & 港股（Tushare Pro）
 
-1. Clone the repository:
-```bash
-git clone https://github.com/Agents365-ai/akshare-dexter.git
-cd akshare-dexter
-```
+| 类别 | 说明 | API |
+|------|------|-----|
+| 基础数据 | A 股和港股股票列表、交易日历 | `stock_basic`、`hk_basic`、`trade_cal` |
+| 低频行情 | A 股和港股日线、周线、月线 OHLCV | `daily`、`hk_daily` |
+| 估值指标 | PE、PB、PS、总市值、换手率 | `daily_basic` |
+| 财务数据 | A 股三大报表 | `income`、`balancesheet`、`cashflow` |
+| 财务指标 | ROE、ROA、毛利率、净利率、增长率 | `fina_indicator` |
+| 港股财务 | 港股利润表、资产负债表、现金流、财务指标 | `hk_income`、`hk_balancesheet`、`hk_cashflow`、`hk_fina_indicator` |
+| 沪深港通持股 | 跨境持股数据（港股通/沪股通） | `hk_hold` |
+| 资金流向 | 北向资金/南向资金 | `moneyflow_hsgt` |
+| 融资融券 | 融资融券余额和交易数据 | `margin` |
+| 大宗交易 | 大宗交易记录 | `block_trade` |
+| 涨跌停 | 每日涨跌停股票列表 | `stk_limit` |
+| 概念板块 | 概念/题材板块及成分股 | `concept`、`concept_detail` |
+| 新闻资讯 | 重大财经新闻 | `major_news` |
 
-2. Install dependencies with Bun:
-```bash
-bun install
-```
+### 美股（Financial Datasets API）
 
-3. Set up your environment variables:
-```bash
-# Copy the example environment file
-cp env.example .env
+股价行情、利润表、资产负债表、现金流量表、关键财务指标、SEC 文件（10-K、10-Q、8-K）
 
-# Edit .env and add your API keys
+---
 
-# === LLM Provider (at least one required) ===
-# DEEPSEEK_API_KEY=your-deepseek-api-key
-# OPENAI_API_KEY=your-openai-api-key
-# ANTHROPIC_API_KEY=your-anthropic-api-key
-# OLLAMA_BASE_URL=http://127.0.0.1:11434
+<img width="1042" height="638" alt="Dexter Screenshot" src="https://github.com/user-attachments/assets/2a6334f9-863f-4bd2-a56f-923e42f4711e" />
 
-# === Chinese A-Share Market (Tushare Pro) ===
-# TUSHARE_TOKEN=your-tushare-token
+---
 
-# === US Stock Market ===
-# FINANCIAL_DATASETS_API_KEY=your-financial-datasets-api-key
+## 支持作者
 
-# === Web Search (optional) ===
-# EXASEARCH_API_KEY=your-exa-api-key
-# TAVILY_API_KEY=your-tavily-api-key
-```
-
-## 🚀 How to Run
-
-Run Dexter in interactive mode:
-```bash
-bun start
-```
-
-Or with watch mode for development:
-```bash
-bun dev
-```
-
-## 📊 How to Evaluate
-
-Dexter includes an evaluation suite that tests the agent against a dataset of financial questions. Evals use LangSmith for tracking and an LLM-as-judge approach for scoring correctness.
-
-**Run on all questions:**
-```bash
-bun run src/evals/run.ts
-```
-
-**Run on a random sample of data:**
-```bash
-bun run src/evals/run.ts --sample 10
-```
-
-The eval runner displays a real-time UI showing progress, current question, and running accuracy statistics. Results are logged to LangSmith for analysis.
-
-## 🐛 How to Debug
-
-Dexter logs all tool calls to a scratchpad file for debugging and history tracking. Each query creates a new JSONL file in `.dexter/scratchpad/`.
-
-**Scratchpad location:**
-```
-.dexter/scratchpad/
-├── 2026-01-30-111400_9a8f10723f79.jsonl
-├── 2026-01-30-143022_a1b2c3d4e5f6.jsonl
-└── ...
-```
-
-Each file contains newline-delimited JSON entries tracking:
-- **init**: The original query
-- **tool_result**: Each tool call with arguments, raw result, and LLM summary
-- **thinking**: Agent reasoning steps
-
-**Example scratchpad entry:**
-```json
-{"type":"tool_result","timestamp":"2026-01-30T11:14:05.123Z","toolName":"get_income_statements","args":{"ticker":"AAPL","period":"annual","limit":5},"result":{...},"llmSummary":"Retrieved 5 years of Apple annual income statements showing revenue growth from $274B to $394B"}
-```
-
-This makes it easy to inspect exactly what data the agent gathered and how it interpreted results.
-
-## 📱 How to Use with WhatsApp
-
-Chat with Dexter through WhatsApp by linking your phone to the gateway. Messages you send to yourself are processed by Dexter and responses are sent back to the same chat.
-
-**Quick start:**
-```bash
-# Link your WhatsApp account (scan QR code)
-bun run gateway:login
-
-# Start the gateway
-bun run gateway
-```
-
-Then open WhatsApp, go to your own chat (message yourself), and ask Dexter a question.
-
-For detailed setup instructions, configuration options, and troubleshooting, see the [WhatsApp Gateway README](src/gateway/channels/whatsapp/README.md).
-
-## 🔌 MCP Server (OpenClaw)
-
-Dexter exposes its financial research tools via [MCP (Model Context Protocol)](https://modelcontextprotocol.io/), enabling integration with OpenClaw, Claude Desktop, and other MCP clients.
-
-**Start the MCP server:**
-```bash
-bun run mcp
-```
-
-**Available MCP tools:**
-
-| Tool | Description |
-|------|-------------|
-| `financial_search` | US stock prices, financials, metrics, news |
-| `financial_metrics` | Fundamental analysis (income, balance sheet, cash flow) |
-| `read_filings` | SEC filing content (10-K, 10-Q, 8-K) |
-| `cn_market_search` | Chinese A-share data (requires `TUSHARE_TOKEN`) |
-| `web_search` | Web search (requires `EXASEARCH_API_KEY` or alternatives) |
-| `web_fetch` | Fetch and extract web page content |
-| `x_search` | X/Twitter sentiment search (requires `X_BEARER_TOKEN`) |
-| `research` | Full autonomous agent loop — multi-step reasoning, tool orchestration, and final report |
-
-**OpenClaw configuration** (`~/.openclaw/openclaw.json`):
-```json
-{
-  "mcpServers": {
-    "akshare-dexter": {
-      "command": "bun",
-      "args": ["run", "src/mcp-server.ts"],
-      "cwd": "/path/to/akshare-dexter"
-    }
-  }
-}
-```
-
-**Claude Desktop configuration** (`claude_desktop_config.json`):
-```json
-{
-  "mcpServers": {
-    "akshare-dexter": {
-      "command": "bun",
-      "args": ["run", "src/mcp-server.ts"],
-      "cwd": "/path/to/akshare-dexter"
-    }
-  }
-}
-```
-
-Meta-tools (`financial_search`, `cn_market_search`) use an LLM internally for routing. Set `DEFAULT_MODEL` env var (default: `deepseek-chat`).
-
-## 🤝 How to Contribute
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-**Important**: Please keep your pull requests small and focused.  This will make it easier to review and merge.
-
-
-## 📄 License
-
-This project is licensed under the [Apache License 2.0](LICENSE).
-
-## Support
-
-If this project helps you, consider supporting the author:
+如果 Dexter 对你有帮助，欢迎支持：
 
 <table>
   <tr>
     <td align="center">
-      <img src="https://raw.githubusercontent.com/Agents365-ai/images_payment/main/qrcode/wechat-pay.png" width="180" alt="WeChat Pay">
+      <img src="https://raw.githubusercontent.com/Agents365-ai/images_payment/main/qrcode/wechat-pay.png" width="180" alt="微信支付">
       <br>
-      <b>WeChat Pay</b>
+      <b>微信支付</b>
     </td>
     <td align="center">
-      <img src="https://raw.githubusercontent.com/Agents365-ai/images_payment/main/qrcode/alipay.png" width="180" alt="Alipay">
+      <img src="https://raw.githubusercontent.com/Agents365-ai/images_payment/main/qrcode/alipay.png" width="180" alt="支付宝">
       <br>
-      <b>Alipay</b>
+      <b>支付宝</b>
     </td>
     <td align="center">
       <img src="https://raw.githubusercontent.com/Agents365-ai/images_payment/main/qrcode/buymeacoffee.png" width="180" alt="Buy Me a Coffee">
@@ -291,9 +99,13 @@ If this project helps you, consider supporting the author:
   </tr>
 </table>
 
-## Author
+## 作者
 
 **Agents365-ai**
 
 - Bilibili: https://space.bilibili.com/1107534197
 - GitHub: https://github.com/Agents365-ai
+
+## 📄 许可证
+
+[Apache License 2.0](LICENSE)
