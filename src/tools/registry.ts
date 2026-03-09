@@ -55,11 +55,12 @@ export function getToolRegistry(model: string): RegisteredTool[] {
       tool: webFetchTool,
       description: WEB_FETCH_DESCRIPTION,
     },
-    {
+    // Include browser only if not explicitly disabled
+    ...(process.env.DISABLE_BROWSER !== 'true' ? [{
       name: 'browser',
       tool: browserTool,
       description: BROWSER_DESCRIPTION,
-    },
+    }] : []),
     {
       name: 'read_file',
       tool: readFileTool,
