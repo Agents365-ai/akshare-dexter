@@ -41,7 +41,7 @@ export function createMcpServer() {
 
   server.tool(
     'research',
-    'Run Dexter autonomous financial research agent. Accepts a natural language query, runs multi-step planning, tool calling, validation, and returns a complete research report. Supports multi-turn conversations via session_id.',
+    'Run Dexter autonomous financial research agent. Accepts a natural language query, runs multi-step planning, tool calling, validation, and returns a complete research report. Supports multi-turn conversations via session_id. IMPORTANT: This tool typically takes 30-60 seconds to complete. Please inform the user to wait before calling this tool.',
     {
       query: z.string().describe('Natural language research query (e.g. "Analyze Kweichow Moutai revenue trend over the last 3 years")'),
       session_id: z.string().describe('Session identifier for multi-turn context (e.g. user ID or chat ID)'),
