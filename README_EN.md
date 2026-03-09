@@ -28,6 +28,38 @@ See the [Chinese README](README.md) for details on how to join.
 - "Recent northbound capital inflows — which stocks?"
 - "BYD vs Tesla investment thesis"
 
+## MCP Server
+
+AKShare Dexter runs as an MCP (Model Context Protocol) server, integrating with OpenClaw, Claude Code, Cursor, and any MCP-compatible client.
+
+It exposes a single `research` tool — accepts natural language queries, runs the full agent loop internally (planning, tool calling, validation, report generation). Supports multi-turn conversations via `session_id`.
+
+### stdio (local)
+
+```bash
+bun run mcp
+```
+
+Configure in your MCP client (e.g. OpenClaw `openclaw.json`):
+
+```json
+{
+  "mcpServers": {
+    "akshare-dexter": {
+      "command": "bun",
+      "args": ["run", "mcp"],
+      "cwd": "/path/to/akshare-dexter"
+    }
+  }
+}
+```
+
+### HTTP (remote deployment)
+
+```bash
+MCP_HTTP_PORT=3100 bun run mcp:http
+```
+
 ## Screenshot
 
 <img width="1042" height="638" alt="AKShare Dexter Screenshot" src="https://github.com/user-attachments/assets/2a6334f9-863f-4bd2-a56f-923e42f4711e" />

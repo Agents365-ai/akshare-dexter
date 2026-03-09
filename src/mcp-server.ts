@@ -3,89 +3,95 @@ import 'dotenv/config';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
-import { getToolRegistry } from './tools/registry.js';
 import { Agent } from './agent/agent.js';
-
-const EXCLUDED_TOOLS = new Set([
-  'browser',    // Stateful Playwright session, not suitable for MCP
-  'read_file',  // Filesystem access - security concern
-  'write_file',
-  'edit_file',
-  'heartbeat',  // Internal gateway tool
-  'skill',      // Dexter-internal skill system
-]);
+import { InMemoryChatHistory } from './utils/in-memory-chat-history.js';
 
 const model = process.env.DEFAULT_MODEL || 'deepseek-chat';
+const SESSION_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
-const server = new McpServer({
-  name: 'akshare-dexter',
-  version: '1.0.0',
-});
+// In-memory session store
+const sessions = new Map<string, { history: InMemoryChatHistory; lastAccess: number }>();
 
-const registry = getToolRegistry(model);
-const exposed: string[] = [];
-
-for (const entry of registry) {
-  if (EXCLUDED_TOOLS.has(entry.name)) continue;
-
-  const tool = entry.tool;
-
-  server.tool(
-    entry.name,
-    entry.description,
-    (tool.schema as any).shape,
-    async (args: Record<string, unknown>) => {
-      try {
-        const result = await tool.invoke(args);
-        const text = typeof result === 'string' ? result : JSON.stringify(result);
-        return { content: [{ type: 'text' as const, text }] };
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        return {
-          content: [{ type: 'text' as const, text: JSON.stringify({ error: message }) }],
-          isError: true,
-        };
-      }
-    },
-  );
-  exposed.push(entry.name);
+function getOrCreateSession(sessionId: string): InMemoryChatHistory {
+  const now = Date.now();
+  let session = sessions.get(sessionId);
+  if (!session) {
+    session = { history: new InMemoryChatHistory(model), lastAccess: now };
+    sessions.set(sessionId, session);
+  }
+  session.lastAccess = now;
+  return session.history;
 }
 
-// Research tool: full agent loop via MCP
-server.tool(
-  'research',
-  'Run Dexter autonomous financial research agent. Accepts a natural language query, plans tasks, calls tools, validates results, and returns a complete research report. Use this for complex multi-step analysis instead of calling individual tools.',
-  { query: z.string().describe('Natural language research query (e.g. "Analyze Apple revenue trend over the last 3 years")'), model: z.string().optional().describe('LLM model to use (defaults to server default)') },
-  async (args) => {
-    const RESEARCH_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
-    const agent = await Agent.create({
-      model: args.model || model,
-      maxIterations: 10,
-    });
-    let answer = '';
-    const timeout = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error('Research timed out after 5 minutes')), RESEARCH_TIMEOUT_MS)
-    );
-    const research = async () => {
-      for await (const event of agent.run(args.query)) {
-        if (event.type === 'done') answer = event.answer;
-      }
-      return answer;
-    };
-    try {
-      await Promise.race([research(), timeout]);
-    } catch (err) {
-      if (!answer) {
-        const message = err instanceof Error ? err.message : String(err);
-        return { content: [{ type: 'text' as const, text: `Error: ${message}` }], isError: true };
-      }
+// Periodic cleanup of expired sessions (every hour)
+setInterval(() => {
+  const now = Date.now();
+  for (const [id, session] of sessions) {
+    if (now - session.lastAccess > SESSION_TTL_MS) {
+      sessions.delete(id);
     }
-    return { content: [{ type: 'text' as const, text: answer || 'No answer generated.' }] };
-  },
-);
-exposed.push('research');
+  }
+}, 60 * 60 * 1000);
 
-process.stderr.write(`[akshare-dexter] MCP server ready. Tools: ${exposed.join(', ')}\n`);
+export function createMcpServer() {
+  const server = new McpServer({
+    name: 'akshare-dexter',
+    version: '1.0.0',
+  });
 
-const transport = new StdioServerTransport();
-await server.connect(transport);
+  server.tool(
+    'research',
+    'Run Dexter autonomous financial research agent. Accepts a natural language query, runs multi-step planning, tool calling, validation, and returns a complete research report. Supports multi-turn conversations via session_id.',
+    {
+      query: z.string().describe('Natural language research query (e.g. "Analyze Kweichow Moutai revenue trend over the last 3 years")'),
+      session_id: z.string().describe('Session identifier for multi-turn context (e.g. user ID or chat ID)'),
+    },
+    async (args) => {
+      const RESEARCH_TIMEOUT_MS = 5 * 60 * 1000;
+      const history = getOrCreateSession(args.session_id);
+
+      history.saveUserQuery(args.query);
+
+      const agent = await Agent.create({
+        model,
+        maxIterations: 10,
+      });
+
+      let answer = '';
+      const timeout = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Research timed out after 5 minutes')), RESEARCH_TIMEOUT_MS)
+      );
+      const research = async () => {
+        for await (const event of agent.run(args.query, history)) {
+          if (event.type === 'done') answer = event.answer;
+        }
+        return answer;
+      };
+
+      try {
+        await Promise.race([research(), timeout]);
+      } catch (err) {
+        if (!answer) {
+          const message = err instanceof Error ? err.message : String(err);
+          return { content: [{ type: 'text' as const, text: `Error: ${message}` }], isError: true };
+        }
+      }
+
+      const finalAnswer = answer || 'No answer generated.';
+      await history.saveAnswer(finalAnswer);
+
+      return { content: [{ type: 'text' as const, text: finalAnswer }] };
+    },
+  );
+
+  return server;
+}
+
+// Only start stdio transport when run directly (not imported)
+const isDirectRun = process.argv[1]?.endsWith('mcp-server.ts') || process.argv[1]?.endsWith('mcp-server.js');
+if (isDirectRun) {
+  const server = createMcpServer();
+  process.stderr.write(`[akshare-dexter] MCP server ready. Tool: research\n`);
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
+}

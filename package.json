@@ -13,6 +13,7 @@
     "gateway": "tsx src/gateway/index.ts run",
     "gateway:login": "tsx src/gateway/index.ts login",
     "mcp": "bun run src/mcp-server.ts",
+    "mcp:http": "bun run src/mcp-server-http.ts",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
     "test:watch": "bun test --watch",
