@@ -8,7 +8,7 @@ An autonomous financial research agent that thinks, plans, and learns as it work
 
 ## Free Access
 
-Use AKShare Dexter for free via **Feishu + OpenClaw** — no installation required.
+Use AKShare Dexter for free via **QQ/Feishu + OpenClaw** — no installation required.
 
 See the [Chinese README](README.md) for details on how to join.
 

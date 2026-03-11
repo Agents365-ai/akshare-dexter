@@ -8,9 +8,9 @@
 
 ## 🆓 免费使用
 
-通过 **飞书** 即可免费使用 AKShare Dexter 的全部金融研究能力。
+通过 **QQ/飞书** 即可免费使用 AKShare Dexter 的全部金融研究能力。
 
-**关注 [Bilibili](https://space.bilibili.com/1107534197) → 加入飞书群组 → 加入即可使用，无需安装任何软件。**
+**关注 [Bilibili](https://space.bilibili.com/1107534197) → 使用QQBOT/加入飞书群组 → 加入即可使用，无需安装任何软件。**
 
 ---
 
